@@ -128,7 +128,7 @@ function Step({ number, title, children }: { number: string; title: string; chil
   return (
     <div className="step">
       <div className="step-number">{number}</div>
-      <div className="step-copy"><h3>{title}</h3><p>{children}</p></div>
+      <div className="step-copy"><h3>{title}</h3><div className="step-body">{children}</div></div>
     </div>
   );
 }
@@ -155,8 +155,8 @@ export function NhfPortal() {
           <p className="first-time">First time here? <a href="#how">Read how this works</a></p>
         </section>
         <div className="rule" />
-        <HowItWorks />
         <FooterLinks />
+        <HowItWorks />
       </main>
       <div className="help-bubble">◔</div>
       <BrowserBar />

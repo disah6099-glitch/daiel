@@ -1,0 +1,1 @@
+- [Mobile browser replicas](mobile-browser-replicas.md) — pin simulated browser and Android chrome to the viewport so references align during screenshot review.

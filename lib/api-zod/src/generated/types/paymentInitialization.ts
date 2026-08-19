@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface PaymentInitialization {
+  amount: number;
+  email: string;
+  name: string;
+  staffId: string;
 }

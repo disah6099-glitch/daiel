@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "NHF Data Regularization Portal"
+description = "A mobile-first Nigerian Housing Fund data regularization and housing loan portal with a guided applicant flow, Paystack processing fee, approval notifications, and an admin review dashboard."
+version = "1.0.0"
+id = "artifacts/nhf-portal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22053
+
+[services.development]
+run = "pnpm --filter @workspace/nhf-portal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nhf-portal", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/nhf-portal/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22053"
+BASE_PATH = "/"

@@ -10,6 +10,12 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: portal
+    description: Applicant portal operations
+  - name: admin
+    description: Admin review operations
+  - name: payments
+    description: Paystack payment operations
 paths:
   /healthz:
     get:
@@ -24,6 +30,194 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /portal/lookup:
+    get:
+      operationId: lookupStaff
+      tags: [portal]
+      summary: Look up a staff record
+      parameters:
+        - name: staffId
+          in: query
+          required: true
+          schema: { type: string, minLength: 3, maxLength: 50 }
+      responses:
+        "200":
+          description: Staff lookup result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffLookup"
+        "400":
+          description: Invalid staff ID
+  /submissions:
+    post:
+      operationId: createSubmission
+      tags: [portal]
+      summary: Create an applicant submission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionInput"
+      responses:
+        "201":
+          description: Created submission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+    get:
+      operationId: listSubmissions
+      tags: [admin]
+      summary: List applicant submissions
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, pending, payment_verified, approved, rejected]
+        - name: search
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Submission list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Submission" }
+  /submissions/{id}:
+    get:
+      operationId: getSubmission
+      tags: [admin, portal]
+      summary: Get a submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Submission
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Submission" }
+        "404": { description: Not found }
+    patch:
+      operationId: updateSubmission
+      tags: [portal, admin]
+      summary: Update applicant details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubmissionUpdate" }
+      responses:
+        "200":
+          description: Updated submission
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Submission" }
+  /submissions/{id}/payment/initialize:
+    post:
+      operationId: initializePayment
+      tags: [payments]
+      summary: Create a Paystack payment record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Paystack checkout configuration
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentInitialization" }
+  /submissions/{id}/payment/verify:
+    post:
+      operationId: verifyPayment
+      tags: [payments]
+      summary: Verify a Paystack transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PaymentVerificationInput" }
+      responses:
+        "200":
+          description: Verified payment and notification
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentVerification" }
+  /submissions/{id}/approve:
+    post:
+      operationId: approveSubmission
+      tags: [admin]
+      summary: Approve a paid submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Approved submission
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Submission" }
+  /submissions/{id}/mark-paid:
+    post:
+      operationId: markSubmissionPaid
+      tags: [admin]
+      summary: Manually mark a submission as paid
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Updated submission
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Submission" }
+  /admin/summary:
+    get:
+      operationId: getAdminSummary
+      tags: [admin]
+      summary: Get admin dashboard metrics
+      responses:
+        "200":
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSummary" }
+  /payments/config:
+    get:
+      operationId: getPaymentConfig
+      tags: [payments]
+      summary: Get browser-safe payment configuration
+      responses:
+        "200":
+          description: Browser-safe Paystack configuration
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentConfig" }
 components:
   schemas:
     HealthStatus:
@@ -33,4 +227,99 @@ components:
           type: string
       required:
         - status
+    StaffLookup:
+      type: object
+      required: [found, staffId, name]
+      properties:
+        found: { type: boolean }
+        staffId: { type: string }
+        name: { type: string }
+        existingRecord: { type: boolean }
+    Submission:
+      type: object
+      required: [id, staffId, name, email, phone, verificationType, status, paymentStatus, createdAt]
+      properties:
+        id: { type: integer }
+        staffId: { type: string }
+        name: { type: string }
+        address: { type: string }
+        phone: { type: string }
+        email: { type: string, format: email }
+        monthlySalary: { type: number }
+        nextOfKin: { type: string }
+        verificationType: { type: string, enum: [BVN, NIN, "Bank account"] }
+        verificationMasked: { type: string }
+        status: { type: string, enum: [pending, payment_verified, approved, rejected] }
+        paymentStatus: { type: string, enum: [unpaid, pending, paid] }
+        paymentReference: { type: ["string", "null"] }
+        notificationStatus: { type: string, enum: [not_sent, sent, failed] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SubmissionInput:
+      type: object
+      required: [staffId, name, address, phone, email, monthlySalary, nextOfKin, verificationType, verificationValue]
+      properties:
+        staffId: { type: string, minLength: 3, maxLength: 50 }
+        name: { type: string, minLength: 2 }
+        address: { type: string, minLength: 5 }
+        phone: { type: string, minLength: 7 }
+        email: { type: string, format: email }
+        monthlySalary: { type: number, minimum: 0 }
+        nextOfKin: { type: string, minLength: 2 }
+        verificationType: { type: string, enum: [BVN, NIN, "Bank account"] }
+        verificationValue: { type: string, minLength: 10, maxLength: 11 }
+    SubmissionUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 2 }
+        address: { type: string, minLength: 5 }
+        phone: { type: string, minLength: 7 }
+        email: { type: string, format: email }
+        monthlySalary: { type: number, minimum: 0 }
+        nextOfKin: { type: string, minLength: 2 }
+    PaymentInitialization:
+      type: object
+      required: [amount, email, name, staffId]
+      properties:
+        amount: { type: integer, example: 1050000 }
+        email: { type: string, format: email }
+        name: { type: string }
+        staffId: { type: string }
+    PaymentVerificationInput:
+      type: object
+      required: [reference]
+      properties:
+        reference: { type: string, minLength: 3 }
+    PaymentVerification:
+      type: object
+      required: [status, reference, message]
+      properties:
+        status: { type: string, enum: [verified] }
+        reference: { type: string }
+        message: { type: string }
+    PaymentConfig:
+      type: object
+      required: [publicKey, amount]
+      properties:
+        publicKey: { type: string }
+        amount: { type: integer, example: 1050000 }
+    AdminSummary:
+      type: object
+      required: [totalSubmissions, pendingReview, paymentVerified, approved, rejected, recentActivity]
+      properties:
+        totalSubmissions: { type: integer }
+        pendingReview: { type: integer }
+        paymentVerified: { type: integer }
+        approved: { type: integer }
+        rejected: { type: integer }
+        recentActivity:
+          type: array
+          items:
+            type: object
+            required: [id, label, detail, createdAt]
+            properties:
+              id: { type: integer }
+              label: { type: string }
+              detail: { type: string }
+              createdAt: { type: string, format: date-time }
 

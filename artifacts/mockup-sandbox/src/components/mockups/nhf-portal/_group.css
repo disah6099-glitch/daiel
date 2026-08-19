@@ -1,0 +1,124 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+.phone-page {
+  min-height: 100vh;
+  color: #10151f;
+  background: #f7f9fb;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.52;
+  overflow: hidden;
+}
+
+.status-bar {
+  height: 43px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+  background: #2554cf;
+  font-size: 16px;
+  font-weight: 500;
+}
+.status-icons { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+.muted-bell { transform: rotate(180deg); font-size: 17px; }
+.signal { letter-spacing: -3px; font-size: 15px; }
+.battery { border: 1px solid #fff; border-radius: 3px; padding: 0 2px; font-size: 10px; line-height: 13px; }
+
+.portal-header {
+  height: 77px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  background: #fff;
+  border-bottom: 1px solid #dfe3e8;
+}
+.nhf-logo {
+  width: 46px; height: 46px; border-radius: 11px;
+  display: grid; place-items: center; flex: 0 0 auto;
+  color: white; background: #2161df; font-size: 17px; font-weight: 500;
+}
+.portal-title { font-size: 18px; line-height: 1.25; font-weight: 500; }
+.portal-subtitle { color: #7c828a; font-size: 15px; line-height: 1.4; }
+
+main { padding-bottom: 76px; }
+.hero { padding: 30px 20px 0; }
+.form-card, .how-card {
+  background: #fff;
+  border: 1px solid #dfe2e5;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.form-card { padding: 28px 25px 25px; }
+h1 { margin: 0 0 8px; font-size: 25px; line-height: 1.25; letter-spacing: -0.6px; }
+.intro { margin: 0 0 32px; color: #6f747b; font-size: 18px; line-height: 1.45; }
+label { display: block; margin-bottom: 8px; color: #5a6068; font-size: 17px; font-weight: 500; }
+input {
+  box-sizing: border-box; width: 100%; height: 59px; padding: 0 17px;
+  border: 1px solid #cbd0d5; border-radius: 11px; outline: none;
+  color: #1d2530; background: #fff; font: inherit; font-size: 18px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.03);
+}
+input:focus { border-color: #2161df; box-shadow: 0 0 0 3px rgba(33,97,223,.15); }
+input::placeholder { color: #aeb4bb; }
+.continue, .start-button {
+  width: 100%; height: 62px; border: 0; border-radius: 9px;
+  color: #fff; background: #2161f3; font: inherit; font-size: 20px;
+  cursor: pointer; box-shadow: 0 2px 4px rgba(26,86,219,.25);
+}
+.continue { margin-top: 26px; }
+.continue:active, .start-button:active { transform: translateY(1px); }
+.success { margin-top: 12px; color: #17633d; font-size: 13px; }
+.first-time { margin: 25px 0 29px; text-align: center; color: #7d8289; font-size: 16px; }
+a { color: #244e91; text-decoration: underline; text-underline-offset: 2px; }
+.rule { height: 1px; margin: 0 20px; background: #e2e5e9; }
+
+.how-card { margin: 28px 20px 0; padding: 27px 25px 28px; }
+.how-card h2 { display: flex; align-items: center; gap: 12px; margin: 0 0 25px; font-size: 24px; line-height: 1.2; }
+.info-icon {
+  width: 22px; height: 22px; display: inline-grid; place-items: center;
+  border: 2px solid #2864d9; border-radius: 50%; color: #2864d9;
+  font: 700 14px Georgia, serif;
+}
+.step { display: grid; grid-template-columns: 38px 1fr; gap: 14px; margin-bottom: 27px; }
+.step-number {
+  width: 36px; height: 36px; display: grid; place-items: center;
+  border-radius: 50%; color: white; background: #2161df; font-size: 17px;
+}
+.step-copy h3, .problem-row h3 { margin: 1px 0 6px; font-size: 19px; line-height: 1.3; font-weight: 500; }
+.step-copy p, .problem-row p { margin: 0; color: #6d737b; font-size: 18px; line-height: 1.42; }
+.note-box { margin-top: 11px; padding: 14px 15px; border: 1px solid #dfe3e8; border-radius: 12px; background: #fafbfd; color: #737980; font-size: 15px; line-height: 1.4; }
+.problem-row { display: grid; grid-template-columns: 38px 1fr; gap: 14px; margin: 6px 0 25px; }
+.question-mark { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #e7ecf4; color: #344150; }
+.start-button { margin-top: 2px; }
+.already { margin: 15px 0 19px; color: #727880; text-align: center; font-size: 16px; line-height: 1.45; }
+.small-copy { margin: 0; color: #8b9096; text-align: center; font-size: 14px; line-height: 1.45; }
+.footer { padding: 31px 20px 12px; text-align: center; color: #858b93; font-size: 14px; }
+.footer p { margin: 0 0 7px; }
+.footer a { display: block; color: #5b626b; margin: 2px 0; }
+
+.help-bubble {
+  position: fixed; right: 24px; bottom: 105px; width: 56px; height: 56px;
+  display: grid; place-items: center; border-radius: 50%; background: white;
+  color: #2264df; font-size: 31px; box-shadow: 0 2px 9px rgba(0,0,0,.22);
+  z-index: 5;
+}
+.browser-bar { height: 75px; display: flex; align-items: center; gap: 7px; padding: 0 15px; background: #f8f9fb; border-top: 1px solid #eef0f3; }
+.browser-arrow, .menu { border: 0; background: transparent; color: #3c4249; font-size: 42px; line-height: 1; cursor: pointer; }
+.browser-arrow { width: 29px; }
+.forward { color: #9da2a8; }
+.address { height: 56px; flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid #e4e7ea; border-radius: 28px; background: #fff; color: #262a2f; font-size: 16px; }
+.tab-count { border: 1px solid #a9adb2; border-radius: 4px; padding: 0 3px; color: #737980; font-size: 12px; }
+.reload { color: #747980; font-size: 22px; }
+.browser-image { width: 53px; height: 53px; display: grid; place-items: center; border-radius: 27px; background: white; border: 1px solid #e4e7ea; font-size: 23px; overflow: hidden; }
+.menu { width: 29px; font-size: 28px; }
+.android-nav { height: 58px; display: flex; align-items: center; justify-content: space-around; padding: 0 104px; background: #fff; }
+.square { width: 18px; height: 18px; border-radius: 3px; background: #777; }
+.circle { width: 22px; height: 22px; border: 2px solid #777; border-radius: 50%; box-shadow: inset 0 0 0 4px #fff; background: #777; }
+.triangle { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-right: 17px solid #777; }
+
+@media (min-width: 600px) {
+  .phone-page { max-width: 461px; margin: 0 auto; }
+}

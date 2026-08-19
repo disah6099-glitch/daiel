@@ -1,0 +1,19 @@
+Build a complete, mobile-first web application for a Data Regularization and Housing Loan Portal with a built-in Admin Dashboard, Paystack payment integration, and automated post-payment approval notifications.
+1. User Portal & UI Design:
+Design & Layout: Styled using Tailwind CSS with a primary color of #1A56DB (blue), light gray background (#F8FAFC), white card layouts (rounded-2xl), and a header with logo "NHF", title "NHF Data Regularization App", and step indicators.
+Multi-Step Flow:
+Step 1 (Identify): Input for "Staff ID/IPPIS No" (e.g., PF1234567).
+Step 2 (Security Check): Verification using BVN (11 digits), NIN (11 digits), or Bank Account Number (10 digits).
+Step 3 (Details Form): Editable profile fields (Name, Address, Phone, Email, Monthly Salary, Next of Kin).
+2. Paystack Integration (₦10,500 Fee):
+*Step 4 (Fee Payment): Include a required ₦10,500 application/processing fee step using the Paystack Inline JS SDK ([https://js.paystack.co/v2/inline.js](https://js.paystack.co/v2/inline.js)).
+Payment Trigger: Initialize PaystackPop with an amount of 1050000 Kobo (₦10,500), passing the user's email, name, and Staff ID as metadata.
+onSuccess Callback: Capture the transaction reference code, set status to "Payment Verified", and automatically send the post-payment approval message.
+3. Automated Approval Notification:
+Create a function sendApprovalNotification(userEmail, userName) that triggers immediately after a successful Paystack transaction.
+Message Text: "Congratulations [Name], your payment has been verified and you have been approved for the housing loan."
+Simulate this in the UI/console, with placeholder code structure ready for Nodemailer or Twilio integration.
+4. Admin Dashboard:
+Overview Stats: Metric cards showing Total Submissions, Pending Review, Payment Verified, Approved, and Rejected.
+Submissions Table: Responsive table listing Applicant Name, Staff ID, Verification Type, Paystack Transaction Reference, Payment Status, and Action Buttons.
+Approval Logic: Admin can view full applicant details in a popup modal. Enable the final "Approve" button only after payment is verified. Include quick controls to manually mark payments as paid if necessary

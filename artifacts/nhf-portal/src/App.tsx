@@ -76,8 +76,44 @@ const statusText: Record<string, string> = {
   paid: 'Paid',
 };
 
+declare global {
+  interface Window {
+    PaystackPop?: {
+      setup: (options: {
+        key: string;
+        email: string;
+        amount: number;
+        currency: string;
+        ref?: string;
+        metadata?: { custom_fields: Array<{ display_name: string; variable_name: string; value: string }> };
+        onClose: () => void;
+        callback: (response: { reference: string }) => void;
+      }) => { openIframe: () => void };
+    };
+  }
+}
+
 function cn(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(' ');
+}
+
+async function loadPaystack(): Promise<void> {
+  if (window.PaystackPop) return;
+  await new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>('script[data-paystack-inline]');
+    if (existing) {
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error('Paystack could not load')), { once: true });
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    script.dataset.paystackInline = 'true';
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Paystack could not load'));
+    document.body.appendChild(script);
+  });
 }
 
 function Button({
@@ -332,11 +368,48 @@ function ApplicantPortal() {
       onError: () => setCreatedMessage('We could not save your details right now. Please review the form and try again.'),
     });
   };
-  const startPayment = () => {
+  const startPayment = async () => {
     if (!submission) return;
     setPaymentMessage('');
+    if (!paymentConfig.data?.publicKey) {
+      setPaymentMessage('Paystack is not configured yet. Please contact the portal administrator.');
+      return;
+    }
     initializePayment.mutate({ id: submission.id }, {
-      onSuccess: () => setPaymentMessage('Payment session ready. Enter the transaction reference from your payment receipt below.'),
+      onSuccess: async (session) => {
+        try {
+          await loadPaystack();
+          if (!window.PaystackPop) throw new Error('Paystack checkout unavailable');
+          const checkout = window.PaystackPop.setup({
+            key: paymentConfig.data!.publicKey,
+            email: session.email,
+            amount: session.amount * 100,
+            currency: 'NGN',
+            ref: `NHF-${submission.id}-${Date.now()}`,
+            metadata: {
+              custom_fields: [
+                { display_name: 'Staff ID', variable_name: 'staff_id', value: session.staffId },
+                { display_name: 'Applicant', variable_name: 'applicant', value: session.name },
+              ],
+            },
+            onClose: () => setPaymentMessage('Payment window closed. You can try again whenever you are ready.'),
+            callback: (response) => {
+              setPaymentRef(response.reference);
+              verifyPayment.mutate({ id: submission.id, data: { reference: response.reference } }, {
+                onSuccess: (result) => {
+                  setSubmission((previous) => previous ? { ...previous, paymentStatus: 'paid', status: 'payment_verified', paymentReference: result.reference } : previous);
+                  setPaidConfirmed(true);
+                  setPaymentMessage(result.message || 'Payment verified successfully.');
+                },
+                onError: () => setPaymentMessage('Paystack returned a payment reference, but verification could not be completed. Please contact support.'),
+              });
+            },
+          });
+          checkout.openIframe();
+        } catch {
+          setPaymentMessage('Paystack checkout could not be opened. Check your connection and try again.');
+        }
+      },
       onError: () => setPaymentMessage('Payment could not be initialized. Please try again.'),
     });
   };
@@ -431,9 +504,9 @@ function ApplicantPortal() {
                     </div>
                     <Notice><span>Payments are processed securely. Do not share your BVN, NIN, or card PIN with anyone claiming to represent NHF.</span></Notice>
                     {paymentMessage && <p className={cn('mt-4 text-sm font-medium', paymentMessage.includes('successfully') || paymentMessage.includes('ready') ? 'text-emerald-700' : 'text-red-600')} data-testid="status-payment-message">{paymentMessage}</p>}
-                    <div className="mt-6 flex flex-col gap-4">
-                      <Button type="button" onClick={startPayment} disabled={initializePayment.isPending} data-testid="button-initialize-payment">{initializePayment.isPending ? <><RefreshCw size={16} className="animate-spin" /> Preparing payment</> : <><Banknote size={16} /> Start payment</>}</Button>
-                      <div className="flex items-end gap-3"><div className="flex-1"><Field label="Payment reference" name="paymentReference" value={paymentRef} onChange={(e) => setPaymentRef(e.target.value)} placeholder="e.g. NHF-7A31F2" hint="Enter this after completing payment." data-testid="input-payment-reference" /></div><Button type="button" variant="secondary" onClick={confirmPayment} disabled={verifyPayment.isPending} data-testid="button-verify-payment">{verifyPayment.isPending ? <RefreshCw size={16} className="animate-spin" /> : <Check size={16} />} Verify</Button></div>
+                     <div className="mt-6 flex flex-col gap-4">
+                       <Button type="button" onClick={startPayment} disabled={initializePayment.isPending || verifyPayment.isPending} data-testid="button-initialize-payment">{initializePayment.isPending || verifyPayment.isPending ? <><RefreshCw size={16} className="animate-spin" /> {verifyPayment.isPending ? 'Verifying payment' : 'Opening Paystack'}</> : <><Banknote size={16} /> Pay securely with Paystack</>}</Button>
+                       <div className="rounded-xl border border-dashed border-border bg-background p-3 text-xs leading-5 text-muted-foreground">After payment, Paystack will return you to this page and verify the transaction automatically.</div>
                     </div>
                   </>
                 ) : (

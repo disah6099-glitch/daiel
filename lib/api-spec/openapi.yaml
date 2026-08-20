@@ -281,7 +281,7 @@ components:
       type: object
       required: [amount, email, name, staffId]
       properties:
-        amount: { type: integer, example: 1050000 }
+        amount: { type: integer, description: Confirmation fee in Nigerian naira., example: 10500 }
         email: { type: string, format: email }
         name: { type: string }
         staffId: { type: string }
@@ -302,7 +302,7 @@ components:
       required: [publicKey, amount]
       properties:
         publicKey: { type: string }
-        amount: { type: integer, example: 1050000 }
+        amount: { type: integer, description: Confirmation fee in Nigerian naira., example: 10500 }
     AdminSummary:
       type: object
       required: [totalSubmissions, pendingReview, paymentVerified, approved, rejected, recentActivity]

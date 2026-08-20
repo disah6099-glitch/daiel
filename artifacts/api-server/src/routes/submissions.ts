@@ -27,7 +27,8 @@ import {
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
-const PAYMENT_AMOUNT = 1_050_000;
+const PAYMENT_AMOUNT_NAIRA = 10_500;
+const PAYMENT_AMOUNT_KOBO = PAYMENT_AMOUNT_NAIRA * 100;
 
 function parseId(raw: string | string[]): number {
   return Number.parseInt(Array.isArray(raw) ? raw[0] : raw, 10);
@@ -157,7 +158,7 @@ router.post("/submissions/:id/payment/initialize", async (req, res): Promise<voi
   await db.update(submissionsTable).set({ paymentStatus: "pending", updatedAt: new Date() })
     .where(eq(submissionsTable.id, row.id));
   res.json(InitializePaymentResponse.parse({
-    amount: PAYMENT_AMOUNT,
+    amount: PAYMENT_AMOUNT_NAIRA,
     email: row.email,
     name: row.name,
     staffId: row.staffId,
@@ -189,7 +190,7 @@ router.post("/submissions/:id/payment/verify", async (req, res): Promise<void> =
     headers: { Authorization: `Bearer ${secret}` },
   });
   const payload = await response.json() as { status?: boolean; data?: { status?: string; amount?: number; reference?: string } };
-  if (!response.ok || !payload.status || payload.data?.status !== "success" || payload.data.amount !== PAYMENT_AMOUNT) {
+  if (!response.ok || !payload.status || payload.data?.status !== "success" || payload.data.amount !== PAYMENT_AMOUNT_KOBO) {
     req.log.warn({ submissionId: row.id, reference: body.data.reference }, "Paystack verification failed");
     res.status(400).json({ error: "Payment could not be verified" });
     return;
@@ -266,7 +267,7 @@ router.get("/admin/summary", async (_req, res): Promise<void> => {
 router.get("/payments/config", async (_req, res): Promise<void> => {
   res.json(GetPaymentConfigResponse.parse({
     publicKey: process.env.PAYSTACK_PUBLIC_KEY ?? "",
-    amount: PAYMENT_AMOUNT,
+    amount: PAYMENT_AMOUNT_NAIRA,
   }));
 });
 
